@@ -1,0 +1,151 @@
+= Bisq Notification system
+:toc:
+
+....
+  Bisq-IP: 3?
+  Layer: External
+  Title: API to enable automated trading
+  Author: Mike Rosseel <mike.rosseel@gmail.com>
+  Comments-Summary: No comments yet.
+  Comments-URI: TODO
+  Status: Draft
+  Created: 2017-11-23
+  License: GPL Version 3
+....
+
+== Abstract
+
+Traders want to be notified when their offers are taken or their trades are done.
+Due to the decentralized nature of Bisq, the interaction between the Bisq clients
+and user-friendly delivery methods such as email, smartphone, slack, ... are not
+easy to perform in a secure and private way.
+
+== Goals
+
+This document will
+
+== Security tradeoff
+
+=== Aggregating server
+
+==== Encrypted messages
+
+As soon as there's one or more servers connecting the clients to 3rd party services,
+this server holds a mapping between an ID (ideally not directly linked to the onion address)
+and a real-life address such as email, slack, android account, etc.
+
+==== Plain-text messages
+
+=== Direct-from-client
+
+This would preserve a maximum of security, but will either expose the users's IP
+address (bad) or require third party notification services running a hidden service,
+which does not seem to exist.
+
+== Proposed architecture
+
+Run one or more servers receiving
+encrypted messages from clients, passing them to third party services which do
+the final delivery.
+
+WARNING: This
+
+== Notification methods
+
+=== Mobile App notifications
+
+==== Android
+
+Android uses Google Cloud Messaging, renamed to Firebase Cloud messaging, for
+its notification support
+
+The new FCM now also supports iOS messaging, so it could be used as a cross-platform
+delivery method.
+
+An Apple Push Notification Authentication Key from your Apple Developer account
+is needed for this integration.
+
+https://developers.google.com/cloud-messaging/[Old Google Cloud Messaging]
+
+https://firebase.google.com/docs/cloud-messaging/[New Firebase Cloud Messaging]
+
+==== iOS
+
+==== Cross-platform notifications
+
+Most of these services provide a unified notification API for Android, iOS and web.
+
+https://www.pushwoosh.com/[pushwoosh]::
+Free tier = up to 1000 devices
+
+https://onesignal.com/[OneSignal]::
+Free tier = unlimited devices, unlimited notifications.
+Read the https://documentation.onesignal.com/reference#create-notification[Rest API documentation] for more information.
+
+https://www.urbanairship.com/[Urban Airship]::
+Free tier = up to 1000 users
+
+https://pushbots.com/[PushBots]::
+Minimum of 45 dollar/month for 4000 users
+
+NOTE: One Signal provides unlimited users/notifications for free so seems a good
+starting point
+
+==== Conclusions
+
+To send Apple notifications, an Apple Developer Account is needed in all cases. (99$ per year)
+To send Google notifications, a google developer account is needed. (25$ one-time fee)
+
+=== Other notifications
+
+==== Slack
+
+Slack has the concept of https://api.slack.com/incoming-webhooks[Incoming Webhooks],
+which are a simple way to post messages from an external source into Slack.
+Technically, it uses an HTTP request with a JSON payload. Message Attachments
+are also supported.
+
+Integrating this is very easy, the central server receives the message + id from
+the Bisq client, maps the id to a secret Slack URL and posts the message to the
+URL.
+
+WARNING: When using encryption with this notification channel, the user will have
+to decrypt the message manually.
+
+==== Email
+
+The big problem with email is that if a personal gmail account or a non-trusted
+IP address starts sending thousands of emails, it will get blacklisted very
+quickly.
+
+For this there are email services which have API's with which emails can be
+sent.
+
+Sendgrid::
+Free tier: 100 emails/day, afterwards $10 for 40000 mails = $0.25 per 1000 mails
+
+
+Mailgun::
+Free tier: up to 10.000 messages per month. Afterwards $0.50 per 1000 mails
+
+Amazon Simple Email Service::
+Free tier for EC2 hosted servers: up to 62.000 email per month, afterwards $0.10 per 1000 mails
+Otherwise (no EC2 hosting): $0.10 per 1000 emails
+
+
+== Implementation technology
+
+=== Mobile apps
+
+* React Native
+* Cordova
+
+=== Server
+
+* Java
+* Tor Hidden services
+
+== References
+
+* https://github.com/bisq-network/analytics/issues/3[Analytics issue #3]
+* https://github.com/bisq-network/exchange/issues/1022[Notification epic #1022]
